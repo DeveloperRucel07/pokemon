@@ -1,1 +1,1 @@
-document.getElementById('pokemons').innerHTML = `<h5>NO Pokemon for the moment</h5>`;
+// document.getElementById('pokemons').innerHTML = `<h5>NO Pokemon for the moment</h5>`;

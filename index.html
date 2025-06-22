@@ -25,14 +25,32 @@
 
     <main class="bg-secondary">
         <div class="container" >
-            <div id="pokemons">
+            <div id="pokemons" class="pokemon_list">
+                <div class="card text-bg-dark m-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <div class="card-header bg-secondary">
+                        Pokemon name
+                    </div>
+                    <div class="card-body">
+                        <img src="./img/pokeball.png" class="card-img-top" alt="...">
+                        <p class="card-text">the description of the pokemon</p>
+                    </div>
+                </div>
+                <div class="card m-1 text-bg-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <div class="card-header bg-secondary">
+                        Pokemon name
+                    </div>
+                    <div class="card-body">
+                        <img src="./img/pokemon_logo.png" class="card-img-top" alt="...">
+                        <p class="card-text">the description of the pokemon</p>
+                    </div>
+                </div>
 
 
             </div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Launch demo modal
-            </button>
-            
+            </button> -->
+
             <div class="loadmore d-flex justify-content-center">
                 <button class="btn btn-outline-light">Load More</button>
             </div>
@@ -47,6 +65,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+
                         <img src="./img/pokeball.png" alt="">
                     </div>
                     <div class="modal-footer">
