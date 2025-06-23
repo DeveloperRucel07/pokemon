@@ -8,7 +8,10 @@ function templateRenderPokemon(detailpokemon){
                 <img src="${detailpokemon.sprites.front_default}" class="card-img-top" alt=" pokemon image">
             </div>
             <div class="card-body">
-                <p class="card-text">${detailpokemon.types.map((t) => t.type.name)}</p>
+                ${detailpokemon.types.map((type) =>  
+                    `<span class="badge text-bg-primary">${type.type.name}</span>`
+                ).join(' ')}
+                
             </div>
         </div>
 
@@ -25,11 +28,10 @@ function templateRenderPokemon(detailpokemon){
                             <img src="${detailpokemon.sprites.front_default}" class="card-img-top" alt=" pokemon image">
                         </div>
                         <div class="modal-body">
-  
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Save changes</button>
+                            <span class="badge text-bg-primary">${detailpokemon.height} m</span>
+                            <span class="badge text-bg-success">${detailpokemon.weight} Kg</span> <br>
+
+                                        
                         </div>
                     </div>
                 </div>
@@ -37,13 +39,4 @@ function templateRenderPokemon(detailpokemon){
 
       
       `;
-}
-
-
-function templateRenderDetailPokemon(id){
-    return `
-        <div class="card">
-            <h2>${id}</h2>
-        </div>   
-    `;
 }

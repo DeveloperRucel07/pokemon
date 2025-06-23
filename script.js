@@ -2,7 +2,8 @@ const url = "https://pokeapi.co/api/v2";
 const query = "/pokemon";
 const urlwithQuery = url + query;
 let loadNumber = 20;
-
+let searchInput = document.getElementById("input_search");
+const loadMoreBtn = document.getElementById("loadmore");
 const loading = document.getElementById("loading");
 const header = document.getElementById("header");
 const mainContain = document.getElementById("main");
@@ -23,7 +24,7 @@ function loadingPokemon(url, timeout = 1000) {
   });
 }
 
-function loadMore(){
+function loadMore() {
   loadNumber += 20;
   getPokemon();
 }
@@ -69,7 +70,7 @@ async function detailPokemon(pokemons) {
   for (const pokemon of pokemons) {
     const detailResponse = await Promise.race([
       fetch(pokemon.url),
-      timeoutPromise(3000),
+      timeoutPromise(2000),
     ]);
     if (!detailResponse.ok) {
       console.error(`Could not fetch data for ${pokemon.name}`);
@@ -80,4 +81,54 @@ async function detailPokemon(pokemons) {
 
     pokemon_list.innerHTML += templateRenderPokemon(detailpokemon);
   }
+}
+
+async function detailPokemonSearch(pokemonsFind) {
+  pokemon_list.innerHTML = "";
+  const detailedData = await Promise.all(
+    pokemonsFind.map((pokemon) => fetch(pokemon.url).then((response) => response.json()))
+  );
+  console.log(detailedData);
+  detailedData.forEach((pokemon) => {
+    pokemon_list.innerHTML += templateRenderPokemon(pokemon);
+  });
+}
+
+function showErrorMessage() {
+  const errorMessage = document.getElementById("error");
+  errorMessage.classList.toggle("desactive");
+  setTimeout(() => {
+    errorMessage.classList.toggle("desactive");
+    searchInput.value = "";
+    stopLoading();
+  }, 2000);
+}
+
+async function searchPokemon() {
+  const searchValue = searchInput.value;
+  showLoading();
+  if (searchValue.length < 3) {
+    showErrorMessage();
+  } else {
+    try {
+      tryToFinePokemon(searchValue);
+    } catch (error) {
+      pokemon_list.innerHTML = `<p style="color: red;">${error.message}</p>`;
+    } finally {
+      loadMoreBtn.classList.add("d-none");
+      stopLoading();
+    }
+  }
+}
+
+async function tryToFinePokemon(searchValue) {
+  const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=10000`);
+  const data = await response.json();
+  const pokemonsFind = data.results.filter((pokemon) =>
+    pokemon.name.includes(searchValue.toLowerCase())
+  );
+  if (pokemonsFind.length === 0) {
+    pokemon_list.innerHTML = `<p class="error"> No Matching Pokemon found</p>`;
+  }
+  return detailPokemonSearch(pokemonsFind);
 }
