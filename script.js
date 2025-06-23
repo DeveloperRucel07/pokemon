@@ -11,43 +11,47 @@ const popup = document.getElementById("popup");
 const pokemon_list = document.getElementById("pokemons");
 pokemon_list.innerHTML = "";
 
-function initiate(){
-    getPokemon();
+function initiate() {
+  getPokemon();
 }
 
-function fetchWithTimeout(url, timeout = 5000) {
-  return Promise.race([
-    fetch(url),
-    new Promise((_, reject) =>
-      setTimeout(
-        () =>
-          reject(new Error("Page could not be loaded — request timed out.")),
-        timeout
-      )
-    ),
-  ]);
+function loadingPokemon(url, timeout = 1000) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(url);
+    }, timeout);
+  });
+}
+
+function loadMore(){
+  loadNumber += 20;
+  getPokemon();
+}
+
+function timeoutPromise(time) {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error("Request timed out")), time);
+  });
 }
 
 function showLoading() {
-  header.style.display = "none";
   mainContain.style.display = "none";
-  footer.style.display = "none";
   loading.style.display = "flex";
 }
 
 function stopLoading() {
   loading.style.display = "none";
-  header.style.display = "block";
   mainContain.style.display = "block";
-  footer.style.display = "block";
 }
 
 async function getPokemon() {
   showLoading();
   try {
-    const response = await fetchWithTimeout(
-      `${urlwithQuery}?limit=${loadNumber}`, 5000
-    );
+    await Promise.race([
+      loadingPokemon(`${urlwithQuery}?limit=${loadNumber}`, 500),
+      timeoutPromise(500),
+    ]);
+    const response = await fetch(`${urlwithQuery}?limit=${loadNumber}`);
     if (!response.ok) {
       throw new Error("Pokemon list not found.");
     }
@@ -61,27 +65,19 @@ async function getPokemon() {
   }
 }
 
-
-async function detailPokemon(pokemons){
-    for (const pokemon of pokemons) {
-      const detailResponse = await fetchWithTimeout(pokemon.url, 5000);
-      if (!detailResponse.ok) {
-        console.error(`Could not fetch data for ${pokemon.name}`);
-        continue;
-      }
-
-      const detailpokemon = await detailResponse.json();
-
-      pokemon_list.innerHTML+= templateRenderPokemon(detailpokemon);
+async function detailPokemon(pokemons) {
+  for (const pokemon of pokemons) {
+    const detailResponse = await Promise.race([
+      fetch(pokemon.url),
+      timeoutPromise(3000),
+    ]);
+    if (!detailResponse.ok) {
+      console.error(`Could not fetch data for ${pokemon.name}`);
+      continue;
     }
-}
 
+    const detailpokemon = await detailResponse.json();
 
-function showPopup(id){
-    
-}
-
-function close_popup(event) {
-  popup.classList.toggle("desactive");
-  event.stopPropagation();
+    pokemon_list.innerHTML += templateRenderPokemon(detailpokemon);
+  }
 }
