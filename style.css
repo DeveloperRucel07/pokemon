@@ -64,6 +64,7 @@ a {
 .card {
   width: 200px;
   height: 300px;
+  cursor: pointer;
 }
 
 .error {
@@ -85,4 +86,40 @@ a {
 .modal {
   width: 300px;
   height: 300px;
+}
+
+.water{
+  background-color: #95ACE6;
+}
+
+.bug{
+  background-color: #A8B835;
+}
+
+.grass{
+  background-color: #5ACDBD;
+}
+
+.fire{
+  background-color: #FF9441;
+}
+
+.normal{
+  background-color: #FFE68B;
+}
+
+.poison{
+  background-color: #A33EA1;
+}
+
+.ground{
+  background-color: #E0C068;
+}
+
+.electric{
+  background-color: #c6f6d4;
+}
+
+.fairy{
+  background-color: #FFC5C5;
 }

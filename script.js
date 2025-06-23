@@ -1,6 +1,6 @@
-const url = "https://pokeapi.co/api/v2";
+const url_start = "https://pokeapi.co/api/v2";
 const query = "/pokemon";
-const urlwithQuery = url + query;
+const urlwithQuery = url_start + query;
 let loadNumber = 20;
 let searchInput = document.getElementById("input_search");
 const loadMoreBtn = document.getElementById("loadmore");
@@ -9,11 +9,11 @@ const header = document.getElementById("header");
 const mainContain = document.getElementById("main");
 const footer = document.getElementById("footer");
 const popup = document.getElementById("popup");
-const pokemon_list = document.getElementById("pokemons");
+let pokemon_list = document.getElementById("pokemons");
 pokemon_list.innerHTML = "";
 
 function initiate() {
-  getPokemon();
+  getPokemon(urlwithQuery, loadNumber);
 }
 
 function loadingPokemon(url, timeout = 1000) {
@@ -24,15 +24,17 @@ function loadingPokemon(url, timeout = 1000) {
   });
 }
 
-function loadMore() {
-  loadNumber += 20;
-  getPokemon();
-}
+
 
 function timeoutPromise(time) {
   return new Promise((_, reject) => {
     setTimeout(() => reject(new Error("Request timed out")), time);
   });
+}
+
+function loadMore() {
+  loadNumber += 20;
+  getPokemon(urlwithQuery, loadNumber);
 }
 
 function showLoading() {
@@ -45,16 +47,16 @@ function stopLoading() {
   mainContain.style.display = "block";
 }
 
-async function getPokemon() {
+async function getPokemon(urlwithQuery, loadNumber) {
   showLoading();
   try {
     await Promise.race([
-      loadingPokemon(`${urlwithQuery}?limit=${loadNumber}`, 500),
-      timeoutPromise(500),
+      loadingPokemon(`${urlwithQuery}?limit=${loadNumber}`, 1000),
+      timeoutPromise(1000),
     ]);
     const response = await fetch(`${urlwithQuery}?limit=${loadNumber}`);
     if (!response.ok) {
-      throw new Error("Pokemon list not found.");
+      throw new Error("Pokemons could not be loaded.");
     }
     const data = await response.json();
     const pokemons = data.results;
@@ -131,4 +133,9 @@ async function tryToFinePokemon(searchValue) {
     pokemon_list.innerHTML = `<p class="error"> No Matching Pokemon found</p>`;
   }
   return detailPokemonSearch(pokemonsFind);
+}
+
+function closeModal(id, event) {
+  document.getElementById("Modal"+id).classList.toggle("desactive");
+  event.stopPropagation();
 }
