@@ -2,6 +2,7 @@ const url_start = "https://pokeapi.co/api/v2";
 const query = "/pokemon";
 const urlwithQuery = url_start + query;
 let loadNumber = 20;
+let offset = 0;
 let searchInput = document.getElementById("input_search");
 const loadMoreBtn = document.getElementById("loadmore");
 const loading = document.getElementById("loading");
@@ -13,7 +14,7 @@ let pokemon_list = document.getElementById("pokemons");
 pokemon_list.innerHTML = "";
 
 function initiate() {
-  getPokemon(urlwithQuery, loadNumber);
+  getPokemon(urlwithQuery, offset, loadNumber);
 }
 
 function loadingPokemon(url, timeout = 1000) {
@@ -33,8 +34,8 @@ function timeoutPromise(time) {
 }
 
 function loadMore() {
-  loadNumber += 20;
-  getPokemon(urlwithQuery, loadNumber);
+  offset+=loadNumber;
+  getPokemon(urlwithQuery, offset, loadNumber);
 }
 
 function showLoading() {
@@ -47,14 +48,14 @@ function stopLoading() {
   mainContain.style.display = "block";
 }
 
-async function getPokemon(urlwithQuery, loadNumber) {
+async function getPokemon(urlwithQuery, offset, loadNumber) {
   showLoading();
   try {
     await Promise.race([
-      loadingPokemon(`${urlwithQuery}?limit=${loadNumber}`, 1000),
+      loadingPokemon(`${urlwithQuery}?limit=${loadNumber}&offset=${offset}`, 1000),
       timeoutPromise(1000),
     ]);
-    const response = await fetch(`${urlwithQuery}?limit=${loadNumber}`);
+    const response = await fetch(`${urlwithQuery}?limit=${loadNumber}&offset=${offset}`);
     if (!response.ok) {
       throw new Error("Pokemons could not be loaded.");
     }
@@ -138,4 +139,10 @@ async function tryToFinePokemon(searchValue) {
 function closeModal(id, event) {
   document.getElementById("Modal"+id).classList.toggle("desactive");
   event.stopPropagation();
+}
+
+function openMyInfo(id_tag, event){
+  document.getElementById(id_tag).classList.toggle("desactive");
+  event.stopPropagation();
+  alert(id_tag)
 }
