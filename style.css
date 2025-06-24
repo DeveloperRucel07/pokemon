@@ -63,7 +63,7 @@ a {
   cursor: pointer;
 }
 
-.modal{
+.modale {
   cursor: pointer;
 }
 
@@ -71,8 +71,8 @@ a {
   transform: rotateY(200deg);
 }
 
-.show_element p{
-  margin : 0 !important;
+.show_element p {
+  margin: 0 !important;
 }
 
 .error {
@@ -86,64 +86,73 @@ a {
   background-color: cadetblue;
 }
 
-.card img{
+.card img {
   width: 100%;
   height: 100%;
   transform: scale(1.4);
   transition: transform 2s ease;
 }
 
-.modal img{
+.modale img {
   width: 50%;
   height: 50%;
   transform: scale(1.5);
   transition: transform 3s ease;
 }
 
-
-.modal {
-  width: 300px;
-  height: 300px;
+.contain {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
 }
 
-.water{
-  background-color: #95ACE6;
-
+.modale {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 500px;
+  height: 500px;
+  border-radius: 10px;
 }
 
-.bug{
-  background-color: #A8B835;
+.water {
+  background-color: #95ace6;
 }
 
-.grass{
-  background-color: #5ACDBD;
+.bug {
+  background-color: #a8b835;
 }
 
-.fire{
-  background-color: #D03B3B;
+.grass {
+  background-color: #5acdbd;
 }
 
-.normal{
-  background-color: #FFE68B;
+.fire {
+  background-color: #d03b3b;
 }
 
-.poison{
-  background-color: #A33EA1;
+.normal {
+  background-color: #ffe68b;
 }
 
-.ground{
-  background-color: #E0C068;
+.poison {
+  background-color: #a33ea1;
 }
 
-.electric{
+.ground {
+  background-color: #e0c068;
+}
+
+.electric {
   background-color: #c6f6d4;
 }
 
-.fairy{
-  background-color: #FFC5C5;
+.fairy {
+  background-color: #ffc5c5;
 }
 
-ul{
+ul {
   list-style-type: none;
   display: flex;
   flex-direction: row;
@@ -152,10 +161,61 @@ ul{
   box-shadow: 0 3px 0 0 black;
 }
 
-li{
+li {
   font-weight: 600;
 }
-li:hover{
+li:hover {
   text-decoration: underline !important;
   color: tomato;
+}
+.modal_image {
+  border-radius: 5px;
+}
+
+.foto_element {
+  display: none;
+  position: fixed;
+  background-color: #0a222c;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  opacity: 0.95;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 50px;
+  margin-bottom: 30px;
+}
+
+.popup {
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  background-color: #0a222c;
+  opacity: 1 !important;
+  width: 570px;
+  height: 600px;
+  border-radius: 8px;
+}
+
+.popup_active {
+  display: inline-flex;
+}
+
+@media (max-width: 400px) {
+  .modale {
+    width: 300px;
+    height: 300px;
+  }
+  .show_element {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contain {
+    margin: auto 0;
+  }
 }

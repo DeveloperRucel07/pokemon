@@ -29,7 +29,7 @@
           >
           <div class="d-flex mb-1">
             <p id="error" class="desactive error">
-              Please enter min 3 characters.
+              Please enter min 3 characters or 1 number
             </p>
             <input
               class="form-control me-2"
@@ -46,8 +46,6 @@
       </nav>
     </header>
 
-    
-
     <div id="loading" class="loading">
       <div class="spinner" id="spinner"></div>
     </div>
@@ -56,10 +54,17 @@
       <div class="container">
         <div id="pokemons" class="pokemon_list"></div>
 
-        <div class="loadmore d-flex justify-content-center m-2" id="loadmore">
-          <button class="btn btn-light text-danger" onclick="loadMore()">
+        <div id="detailPokemonId" class="foto_element" onclick="close_popup(event)">
+
+        </div>
+
+        <div class="loadmore d-flex justify-content-center " id="loadmore">
+          <button class="btn btn-light text-danger m-2" onclick="loadMore()">
             Load More
           </button>
+        </div>
+        <div class="startBtn justify-content-center d-flex" id="startBtn">
+          
         </div>
       </div>
     </main>

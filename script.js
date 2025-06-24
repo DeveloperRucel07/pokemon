@@ -1,15 +1,16 @@
 const url_start = "https://pokeapi.co/api/v2";
 const query = "/pokemon";
 const urlwithQuery = url_start + query;
-let loadNumber = 20;
+let loadNumber = 21;
 let offset = 0;
 let searchInput = document.getElementById("input_search");
 const loadMoreBtn = document.getElementById("loadmore");
+const startBtn = document.getElementById("startBtn");
 const loading = document.getElementById("loading");
 const header = document.getElementById("header");
 const mainContain = document.getElementById("main");
 const footer = document.getElementById("footer");
-const popup = document.getElementById("popup");
+const detailPokemonId = document.getElementById("detailPokemonId");
 let pokemon_list = document.getElementById("pokemons");
 pokemon_list.innerHTML = "";
 
@@ -25,8 +26,6 @@ function loadingPokemon(url, timeout = 1000) {
   });
 }
 
-
-
 function timeoutPromise(time) {
   return new Promise((_, reject) => {
     setTimeout(() => reject(new Error("Request timed out")), time);
@@ -34,7 +33,7 @@ function timeoutPromise(time) {
 }
 
 function loadMore() {
-  offset+=loadNumber;
+  offset += loadNumber;
   getPokemon(urlwithQuery, offset, loadNumber);
 }
 
@@ -52,10 +51,15 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
   showLoading();
   try {
     await Promise.race([
-      loadingPokemon(`${urlwithQuery}?limit=${loadNumber}&offset=${offset}`, 1000),
+      loadingPokemon(
+        `${urlwithQuery}?limit=${loadNumber}&offset=${offset}`,
+        1000
+      ),
       timeoutPromise(1000),
     ]);
-    const response = await fetch(`${urlwithQuery}?limit=${loadNumber}&offset=${offset}`);
+    const response = await fetch(
+      `${urlwithQuery}?limit=${loadNumber}&offset=${offset}`
+    );
     if (!response.ok) {
       throw new Error("Pokemons could not be loaded.");
     }
@@ -89,9 +93,10 @@ async function detailPokemon(pokemons) {
 async function detailPokemonSearch(pokemonsFind) {
   pokemon_list.innerHTML = "";
   const detailedData = await Promise.all(
-    pokemonsFind.map((pokemon) => fetch(pokemon.url).then((response) => response.json()))
+    pokemonsFind.map((pokemon) =>
+      fetch(pokemon.url).then((response) => response.json())
+    )
   );
-  console.log(detailedData);
   detailedData.forEach((pokemon) => {
     pokemon_list.innerHTML += templateRenderPokemon(pokemon);
   });
@@ -109,40 +114,89 @@ function showErrorMessage() {
 
 async function searchPokemon() {
   const searchValue = searchInput.value;
+  const isNumber = /^\d+$/.test(searchValue);
+  const isValidName = searchValue.length >= 3;
   showLoading();
-  if (searchValue.length < 3) {
+  if (!isNumber && !isValidName) {
     showErrorMessage();
   } else {
     try {
-      tryToFinePokemon(searchValue);
+      tryToFindPokemon(searchValue);
     } catch (error) {
       pokemon_list.innerHTML = `<p style="color: red;">${error.message}</p>`;
     } finally {
+      startBtn.innerHTML = `<a class="btn btn-light text-danger" href="./index.html">Start</a>`;
       loadMoreBtn.classList.add("d-none");
       stopLoading();
     }
   }
 }
 
-async function tryToFinePokemon(searchValue) {
-  const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=10000`);
-  const data = await response.json();
-  const pokemonsFind = data.results.filter((pokemon) =>
-    pokemon.name.includes(searchValue.toLowerCase())
-  );
-  if (pokemonsFind.length === 0) {
-    pokemon_list.innerHTML = `<p class="error"> No Matching Pokemon found</p>`;
+async function tryToFindPokemon(searchValue) {
+  const value = searchValue.toLowerCase().trim();
+  showLoading();
+  try {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${value}`);
+    if (!response.ok) throw new Error("Error to find the Pokemon");
+    const data = await response.json();
+    return detailPokemonSearch([
+      { name: data.name, url: `https://pokeapi.co/api/v2/pokemon/${data.id}` },
+    ]);
+  } catch {
+    const listResponse = await fetch(
+      `https://pokeapi.co/api/v2/pokemon?limit=10000`
+    );
+    const listData = await listResponse.json();
+    const results = listData.results.filter((pokemon) =>
+      pokemon.name.includes(value)
+    );
+
+    if (results.length === 0) {
+      pokemon_list.innerHTML = `<p class="error">No matching Pokémon found.</p>`;
+      return;
+    }
+
+    return detailPokemonSearch(results);
+  } finally {
+    stopLoading();
   }
-  return detailPokemonSearch(pokemonsFind);
 }
 
-function closeModal(id, event) {
-  document.getElementById("Modal"+id).classList.toggle("desactive");
+async function ShowPokemonById(id) {
+  const container = document.getElementById("pokemon_list"); // or your display area
+  showLoading();
+  try {
+    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    if (!response.ok) throw new Error("Pokémon not found");
+    const detailpokemon = await response.json();
+    detailPokemonId.innerHTML = templateRenderDetailPokemon(detailpokemon);
+  } catch (error) {
+    container.innerHTML = `<p style="color:red;">${error.message}</p>`;
+  } finally {
+    popupElement();
+    stopLoading();
+  }
+}
+
+function popupElement() {
+  document.getElementById("detailPokemonId").classList.add("popup_active");
+}
+
+function close_popup(event) {
+  document.getElementById("detailPokemonId").classList.toggle("popup_active");
   event.stopPropagation();
 }
 
-function openMyInfo(id_tag, event){
-  document.getElementById(id_tag).classList.toggle("desactive");
+function stop_event(event) {
   event.stopPropagation();
-  alert(id_tag)
+}
+
+function prev(id, event) {
+  ShowPokemonById(id > 0 ? id - 1 : 0);
+  event.stopPropagation();
+}
+
+function next(id, event) {
+  ShowPokemonById(id + 1);
+  event.stopPropagation();
 }
