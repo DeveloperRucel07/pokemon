@@ -12,13 +12,13 @@ const mainContain = document.getElementById("main");
 const footer = document.getElementById("footer");
 const detailPokemonId = document.getElementById("detailPokemonId");
 let pokemon_list = document.getElementById("pokemons");
-pokemon_list.innerHTML = "";
 
 function initiate() {
+  showLoading();
   getPokemon(urlwithQuery, offset, loadNumber);
 }
 
-function loadingPokemon(url, timeout = 1000) {
+function loadingPokemon(url, timeout = 500) {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(url);
@@ -33,8 +33,8 @@ function timeoutPromise(time) {
 }
 
 function loadMore() {
-  offset += loadNumber;
   getPokemon(urlwithQuery, offset, loadNumber);
+  offset += loadNumber;
 }
 
 function showLoading() {
@@ -48,14 +48,13 @@ function stopLoading() {
 }
 
 async function getPokemon(urlwithQuery, offset, loadNumber) {
-  showLoading();
   try {
     await Promise.race([
       loadingPokemon(
         `${urlwithQuery}?limit=${loadNumber}&offset=${offset}`,
-        1000
+        500
       ),
-      timeoutPromise(1000),
+      timeoutPromise(500),
     ]);
     const response = await fetch(
       `${urlwithQuery}?limit=${loadNumber}&offset=${offset}`
@@ -77,7 +76,7 @@ async function detailPokemon(pokemons) {
   for (const pokemon of pokemons) {
     const detailResponse = await Promise.race([
       fetch(pokemon.url),
-      timeoutPromise(2000),
+      timeoutPromise(500),
     ]);
     if (!detailResponse.ok) {
       console.error(`Could not fetch data for ${pokemon.name}`);
@@ -119,17 +118,33 @@ async function searchPokemon() {
   showLoading();
   if (!isNumber && !isValidName) {
     showErrorMessage();
+    return;
   } else {
     try {
       tryToFindPokemon(searchValue);
     } catch (error) {
       pokemon_list.innerHTML = `<p style="color: red;">${error.message}</p>`;
     } finally {
-      startBtn.innerHTML = `<a class="btn btn-light text-danger" href="./index.html">Start</a>`;
+      startBtn.innerHTML = `<a class="btn btn-light text-danger w-25" href="./index.html">Start</a>`;
       loadMoreBtn.classList.add("d-none");
       stopLoading();
     }
   }
+}
+
+async function findMatched(value) {
+  const listResponse = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?limit=10000`
+  );
+  const listData = await listResponse.json();
+  const results = listData.results.filter((pokemon) =>
+    pokemon.name.includes(value)
+  );
+  if (results.length === 0) {
+    pokemon_list.innerHTML = `<p class="error">No matching Pokémon found.</p>`;
+    return;
+  }
+  return detailPokemonSearch(results);
 }
 
 async function tryToFindPokemon(searchValue) {
@@ -137,34 +152,23 @@ async function tryToFindPokemon(searchValue) {
   showLoading();
   try {
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${value}`);
-    if (!response.ok) throw new Error("Error to find the Pokemon");
-    const data = await response.json();
-    return detailPokemonSearch([
-      { name: data.name, url: `https://pokeapi.co/api/v2/pokemon/${data.id}` },
-    ]);
-  } catch {
-    const listResponse = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?limit=10000`
-    );
-    const listData = await listResponse.json();
-    const results = listData.results.filter((pokemon) =>
-      pokemon.name.includes(value)
-    );
-
-    if (results.length === 0) {
-      pokemon_list.innerHTML = `<p class="error">No matching Pokémon found.</p>`;
-      return;
-    }
-
-    return detailPokemonSearch(results);
+    if (!response.ok) {
+      await findMatched(value);
+    }else{
+      const data = await response.json();
+      return detailPokemonSearch([
+        { name: data.name, url: `https://pokeapi.co/api/v2/pokemon/${data.id}` },
+      ]);
+    } 
+  } catch (error) {
+    pokemon_list.innerHTML=`<p style="color:red;">${error.message}</p>`;
   } finally {
     stopLoading();
   }
 }
 
 async function ShowPokemonById(id) {
-  const container = document.getElementById("pokemon_list"); // or your display area
-  showLoading();
+  const container = document.getElementById("pokemon_list");
   try {
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
     if (!response.ok) throw new Error("Pokémon not found");
@@ -192,11 +196,15 @@ function stop_event(event) {
 }
 
 function prev(id, event) {
-  ShowPokemonById(id > 0 ? id - 1 : 0);
+  let lastId = 10277;
+  const newId = id > 1 ? id - 1 : lastId;
+  ShowPokemonById(newId);
   event.stopPropagation();
 }
 
 function next(id, event) {
-  ShowPokemonById(id + 1);
+  const lastId = 10277;
+  const newId = id < lastId ? id + 1 : 1;
+  ShowPokemonById(newId);
   event.stopPropagation();
 }
