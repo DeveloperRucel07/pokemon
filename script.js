@@ -48,14 +48,16 @@ function stopLoading() {
 }
 
 function hasGoodConnection() {
-  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const conn =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection;
   if (conn) {
-    const slowTypes = ['slow-2g', '2g', '3g'];
+    const slowTypes = ["slow-2g", "2g", "3g"];
     return !slowTypes.includes(conn.effectiveType);
   }
   return true;
 }
-
 
 async function getPokemon(urlwithQuery, offset, loadNumber) {
   if (!hasGoodConnection()) {
@@ -152,23 +154,40 @@ async function findMatched(value) {
   return detailPokemonSearch(results);
 }
 
+function checkIfId(searchValue) {
+  const match = searchValue.match(/\d+/);
+  if (match) {
+    const number = parseInt(match[0], 10);
+    return number;
+  } else {
+    return;
+  }
+}
+
 async function tryToFindPokemon(searchValue) {
   const value = searchValue.toLowerCase().trim();
   showLoading();
   try {
-    const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${value}`);
-    if (response.ok) {
-      const data = await response.json();
-      return detailPokemonSearch([
-        { name: data.name, url: `https://pokeapi.co/api/v2/pokemon/${data.id}` },
-      ]);
-    }else if(response.status === 404){
+    const id = checkIfId(value);
+    if (id) {
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${value}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        return detailPokemonSearch([
+          {
+            name: data.name,
+            url: `https://pokeapi.co/api/v2/pokemon/${data.id}`,
+          },
+        ]);
+      }
+    } else {
       await findMatched(value);
-    }else {
-      throw new Error("Something went wrong fetching Pokemon.");
     }
   } catch (error) {
-    pokemon_list.innerHTML=`<p style="color:red;">${error.message}</p>`;
+    pokemon_list.innerHTML = `<p style="color:red;">${error.message}</p>`;
+    throw new Error("Something went wrong fetching Pokemon.");
   } finally {
     stopLoading();
   }
@@ -178,7 +197,8 @@ async function ShowPokemonById(id) {
   const container = document.getElementById("pokemon_list");
   try {
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    if (!response.ok || response.status === 404) throw new Error("Pokémon not found");
+    if (!response.ok || response.status === 404)
+      throw new Error("Pokémon not found");
     const detailpokemon = await response.json();
     detailPokemonId.innerHTML = templateRenderDetailPokemon(detailpokemon);
   } catch (error) {
