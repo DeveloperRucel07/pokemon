@@ -83,8 +83,7 @@ async function detailPokemon(pokemons) {
     }
     const response = await fetch(pokemon.url);
     if (!response.ok) {
-      console.warn(`Could not fetch data for ${pokemon.name}`);
-      return null;
+      throw new Error(`Pokemon could not be loaded ${pokemon.name}.`);
     }
     const data = await response.json();
     pokemonCache[pokemon.name] = data;
