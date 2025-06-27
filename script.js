@@ -13,7 +13,6 @@ const mainContain = document.getElementById("main");
 const footer = document.getElementById("footer");
 const detailPokemonId = document.getElementById("detailPokemonId");
 let pokemon_list = document.getElementById("pokemons");
-const pokemonCache = {};
 
 function initiate() {
   showLoading();
@@ -71,7 +70,7 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
     const pokemons = data.results;
     for (let i = 0; i < pokemons.length; i++) {
       const pokemon = pokemons[i];
-      pokemonCache
+      await detailPokemon(pokemon);
     }
   } catch (error) {
     pokemon_list.innerHTML = `<p style="color: red;">${error.message}</p>`;
@@ -85,14 +84,6 @@ async function detailPokemon(pokemon) {
   if (!detailResponse.ok) {
     throw new Error(`Could not fetch data for ${pokemon.name}`);
   }
-
-
-  const details = await Promise.all(promises);
-  const htmlPokemonCard = details
-    .filter(Boolean)
-    .map((pokemon) => templateRenderPokemon(pokemon))
-    .join("");
-  pokemon_list.innerHTML += htmlPokemonCard;
   const detailpokemon = await detailResponse.json();
   pokemon_list.innerHTML += templateRenderPokemon(detailpokemon);
 }
