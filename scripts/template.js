@@ -1,5 +1,4 @@
 function templateRenderPokemon(detailpokemon){
-    // const imageUrl = detailpokemon?.sprites?.front_default || "./img/pokemon_logo.png";
     return `
         <div class="card m-1" onclick="ShowPokemonById(${detailpokemon.id})">
             <div class="card-header bg-secondary text-white">
@@ -7,8 +6,8 @@ function templateRenderPokemon(detailpokemon){
                     #${detailpokemon.id} - ${detailpokemon.name.toUpperCase()}
                 </span>
             </div>
-            <div class="card-body ${detailpokemon.types[0]?.type.name} ">
-                <img src="${detailpokemon.sprites.front_default}" class="card-img-top image" alt=" pokemon image">
+            <div class="card-body ${detailpokemon.types[0]?.type.name} text-center">
+                <img src="${detailpokemon.sprites.other.dream_world.front_default ||  './img/pokemon_logo.png'}" class="card-img-top image" alt="image pokemon ${detailpokemon.name}">
             </div>
             <div class="card-body text-center bg-info-subtle">
                 ${detailpokemon.types.map((type) =>  
@@ -20,7 +19,6 @@ function templateRenderPokemon(detailpokemon){
 }
 
 function templateRenderDetailPokemon(detailpokemon){
-    // const imageUrl = detailpokemon?.sprites?.front_default || "./img/pokemon_logo.png";
     return `
         <div class="contain" onclick="close_popup(event)">
             <div class="modale" onclick="stop_event(event)">
@@ -36,7 +34,7 @@ function templateRenderDetailPokemon(detailpokemon){
                         <button type="button" class="btn-close" onclick="close_popup(event)"></button>
                     </div>
                     <div class=" modal_image d-flex justify-content-center ${detailpokemon.types[0]?.type.name}">
-                        <img src="${detailpokemon.sprites.front_default}" class="card-img-top image" alt=" pokemon image">
+                        <img src="${detailpokemon.sprites.other.dream_world.front_default ||  './img/pokemon_logo.png'}" class="card-img-top image" alt="image pokemon ${detailpokemon.name}">
                     </div>
                     <div class="content-pokemon">
                         <div class="row show_element " id="show_element">

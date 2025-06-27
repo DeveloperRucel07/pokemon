@@ -68,7 +68,11 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
       throw new Error("Pokemon could not be loaded.");
     }
     const data = await response.json();
-    await detailPokemon(data.results);
+    const pokemons = data.results;
+    for (let i = 0; i < pokemons.length; i++) {
+      const pokemon = pokemons[i];
+      pokemonCache
+    }
   } catch (error) {
     pokemon_list.innerHTML = `<p style="color: red;">${error.message}</p>`;
   } finally {
@@ -76,25 +80,21 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
   }
 }
 
-async function detailPokemon(pokemons) {
-  const promises = pokemons.map(async (pokemon) => {
-    if (pokemonCache[pokemon.name]) {
-      return pokemonCache[pokemon.name];
-    }
-    const response = await fetch(pokemon.url);
-    if (!response.ok) {
-      throw new Error(`Pokemon could not be loaded ${pokemon.name}.`);
-    }
-    const data = await response.json();
-    pokemonCache[pokemon.name] = data;
-    return data;
-  });
+async function detailPokemon(pokemon) {
+  const detailResponse = await fetch(pokemon.url);
+  if (!detailResponse.ok) {
+    throw new Error(`Could not fetch data for ${pokemon.name}`);
+  }
+
+
   const details = await Promise.all(promises);
   const htmlPokemonCard = details
     .filter(Boolean)
     .map((pokemon) => templateRenderPokemon(pokemon))
     .join("");
   pokemon_list.innerHTML += htmlPokemonCard;
+  const detailpokemon = await detailResponse.json();
+  pokemon_list.innerHTML += templateRenderPokemon(detailpokemon);
 }
 
 async function detailPokemonSearch(pokemonsFind) {
