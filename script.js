@@ -13,6 +13,7 @@ const mainContain = document.getElementById("main");
 const footer = document.getElementById("footer");
 const detailPokemonId = document.getElementById("detailPokemonId");
 let pokemon_list = document.getElementById("pokemons");
+let pokemonAlreadyLoaded = {};
 
 function initiate() {
   showLoading();
@@ -60,16 +61,12 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
     return;
   }
   try {
-    const response = await fetch(
-      `${urlwithQuery}?limit=${loadNumber}&offset=${offset}`
-    );
-    if (!response.ok) {
-      throw new Error("Pokemon could not be loaded.");
-    }
+    const response = await fetch(`${urlwithQuery}?limit=${loadNumber}&offset=${offset}`);
+    if (!response.ok) {throw new Error("Pokemon could not be loaded.");}
     const data = await response.json();
     const pokemons = data.results;
     for (let i = 0; i < pokemons.length; i++) {
-      const pokemon = pokemons[i];
+      let pokemon = pokemons[i];
       await detailPokemon(pokemon);
     }
   } catch (error) {
@@ -80,12 +77,19 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
 }
 
 async function detailPokemon(pokemon) {
-  const detailResponse = await fetch(pokemon.url);
-  if (!detailResponse.ok) {
-    throw new Error(`Could not fetch data for ${pokemon.name}`);
+  let detailpokemon;
+  if(pokemonAlreadyLoaded[pokemon.name]){
+    detailpokemon = pokemonAlreadyLoaded[pokemon.name];
+  }else{
+    const detailResponse = await fetch(pokemon.url);
+    if (!detailResponse.ok) {
+      throw new Error(`Could not fetch data for ${pokemon.name}`);
+    }
+    detailpokemon = await detailResponse.json();
+    pokemonAlreadyLoaded[pokemon.name] = detailpokemon;
   }
-  const detailpokemon = await detailResponse.json();
   pokemon_list.innerHTML += templateRenderPokemon(detailpokemon);
+  
 }
 
 async function detailPokemonSearch(pokemonsFind) {
