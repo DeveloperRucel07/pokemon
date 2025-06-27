@@ -3,6 +3,7 @@ const query = "/pokemon";
 const urlwithQuery = url_start + query;
 let loadNumber = 21;
 let offset = 0;
+let clickcount = 0;
 let searchInput = document.getElementById("input_search");
 const loadMoreBtn = document.getElementById("loadmore");
 const startBtn = document.getElementById("startBtn");
@@ -12,29 +13,23 @@ const mainContain = document.getElementById("main");
 const footer = document.getElementById("footer");
 const detailPokemonId = document.getElementById("detailPokemonId");
 let pokemon_list = document.getElementById("pokemons");
+const pokemonCache = {};
 
 function initiate() {
   showLoading();
   getPokemon(urlwithQuery, offset, loadNumber);
 }
 
-function loadingPokemon(url, timeout = 500) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(url);
-    }, timeout);
-  });
-}
-
-function timeoutPromise(time) {
-  return new Promise((_, reject) => {
-    setTimeout(() => reject(new Error("Request timed out")), time);
-  });
-}
-
 function loadMore() {
-  getPokemon(urlwithQuery, offset, loadNumber);
-  offset += loadNumber;
+  clickcount += 1;
+  if (clickcount === 1) {
+    offset = 21;
+    getPokemon(urlwithQuery, offset, loadNumber);
+    offset += loadNumber;
+  } else {
+    getPokemon(urlwithQuery, offset, loadNumber);
+    offset += loadNumber;
+  }
 }
 
 function showLoading() {
@@ -70,11 +65,10 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
       `${urlwithQuery}?limit=${loadNumber}&offset=${offset}`
     );
     if (!response.ok) {
-      throw new Error("Pokemons could not be loaded.");
+      throw new Error("Pokemon could not be loaded.");
     }
     const data = await response.json();
-    const pokemons = data.results;
-    detailPokemon(pokemons);
+    await detailPokemon(data.results);
   } catch (error) {
     pokemon_list.innerHTML = `<p style="color: red;">${error.message}</p>`;
   } finally {
@@ -83,17 +77,25 @@ async function getPokemon(urlwithQuery, offset, loadNumber) {
 }
 
 async function detailPokemon(pokemons) {
-  for (const pokemon of pokemons) {
-    const detailResponse = await Promise.race([
-      fetch(pokemon.url),
-      timeoutPromise(500),
-    ]);
-    if (!detailResponse.ok) {
-      throw new Error(`Could not fetch data for ${pokemon.name}`);
+  const promises = pokemons.map(async (pokemon) => {
+    if (pokemonCache[pokemon.name]) {
+      return pokemonCache[pokemon.name];
     }
-    const detailpokemon = await detailResponse.json();
-    pokemon_list.innerHTML += templateRenderPokemon(detailpokemon);
-  }
+    const response = await fetch(pokemon.url);
+    if (!response.ok) {
+      console.warn(`Could not fetch data for ${pokemon.name}`);
+      return null;
+    }
+    const data = await response.json();
+    pokemonCache[pokemon.name] = data;
+    return data;
+  });
+  const details = await Promise.all(promises);
+  const htmlPokemonCard = details
+    .filter(Boolean)
+    .map((pokemon) => templateRenderPokemon(pokemon))
+    .join("");
+  pokemon_list.innerHTML += htmlPokemonCard;
 }
 
 async function detailPokemonSearch(pokemonsFind) {
